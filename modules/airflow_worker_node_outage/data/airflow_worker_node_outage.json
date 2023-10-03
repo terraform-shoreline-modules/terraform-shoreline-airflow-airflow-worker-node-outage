@@ -1,0 +1,142 @@
+{
+  "name": "airflow_worker_node_outage",
+  "description": "An Airflow worker node is a component of the Apache Airflow system that performs scheduled tasks and manages workflow execution. When a worker node goes down, it means that the tasks and workflows assigned to that node cannot be executed until the issue is resolved. This can cause delays and disruptions to scheduled processes and may require urgent attention from the system administrators to restore functionality. The incident may occur due to hardware or software failures, connectivity issues, or other technical problems.",
+  "params": [
+    {
+      "name": "NODE_ID",
+      "value": ""
+    },
+    {
+      "name": "MEMORY_THRESHOLD",
+      "value": ""
+    },
+    {
+      "name": "CPU_THRESHOLD",
+      "value": ""
+    },
+    {
+      "name": "WORKER_NODE_IP_ADDRESS",
+      "value": ""
+    },
+    {
+      "name": "WORKER_NODE_PORT",
+      "value": ""
+    },
+    {
+      "name": "NEW_CPU_COUNT",
+      "value": ""
+    },
+    {
+      "name": "NEW_DISK_SIZE",
+      "value": ""
+    },
+    {
+      "name": "NEW_MEMORY_SIZE",
+      "value": ""
+    },
+    {
+      "name": "HOST_NAME",
+      "value": ""
+    },
+    {
+      "name": "K8S_CLUSTER_NAME",
+      "value": ""
+    },
+    {
+      "name": "NAMESPACE",
+      "value": ""
+    }
+  ],
+  "cells": [
+    {
+      "name": "cell_1",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Airflow worker node outage.\nAn Airflow worker node is a component of the Apache Airflow system that performs scheduled tasks and manages workflow execution. When a worker node goes down, it means that the tasks and workflows assigned to that node cannot be executed until the issue is resolved. This can cause delays and disruptions to scheduled processes and may require urgent attention from the system administrators to restore functionality. The incident may occur due to hardware or software failures, connectivity issues, or other technical problems."
+    },
+    {
+      "name": "cell_2",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check if the Airflow worker node is responding to ping requests"
+    },
+    {
+      "name": "cell_3",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `ping ${WORKER_NODE_IP_ADDRESS}`"
+    },
+    {
+      "name": "cell_4",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check if the Airflow worker node is listening on the expected port"
+    },
+    {
+      "name": "cell_5",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `nc -vz ${WORKER_NODE_IP_ADDRESS} ${WORKER_NODE_PORT}`"
+    },
+    {
+      "name": "cell_6",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check if there are any Airflow-related processes running on the worker node"
+    },
+    {
+      "name": "cell_7",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `ps aux | grep airflow`"
+    },
+    {
+      "name": "cell_8",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the logs of the Airflow worker process"
+    },
+    {
+      "name": "cell_9",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `tail -n 100 /var/log/airflow/worker.log`"
+    },
+    {
+      "name": "cell_10",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the status of the Airflow worker service"
+    },
+    {
+      "name": "cell_11",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `systemctl status airflow-worker.service`"
+    },
+    {
+      "name": "cell_12",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Insufficient resources on the Airflow worker node, leading to memory or CPU exhaustion."
+    },
+    {
+      "name": "cell_13",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "host | host_name=$HOST_NAME | invoke_memory_cpu_threshold_check($MEMORY_THRESHOLD, $CPU_THRESHOLD)"
+    },
+    {
+      "name": "cell_14",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## If the issue persists, consider increasing the resources allocated to the worker node, such as CPU, memory, or disk space."
+    },
+    {
+      "name": "cell_15",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "host | host_name=$HOST_NAME | invoke_update_resources($NODE_ID, $NEW_CPU_COUNT, $NEW_DISK_SIZE, $NEW_MEMORY_SIZE)"
+    }
+  ]
+}
